@@ -1,0 +1,59 @@
+// Dragonfly protocol buffer definition.
+
+syntax = "proto3";
+
+package dragonfly.rpc;
+option java_package = "dragonfly.rpc";
+option java_multiple_files = true;
+option java_outer_classname = "DragonflyProto";
+option objc_class_prefix = "DP";
+
+// The engine service definition.
+service Engine {
+    // Methods to get information from the active engine.
+    rpc ListGrammars (GrammarRequest) returns (stream GrammarData) {}
+
+    // TODO Add more methods
+
+}
+
+// The request message for getting a list of grammars.
+message GrammarRequest {}
+
+// Message containing dragonfly grammar data.
+message GrammarData {
+    // The grammar's name.
+    string name = 1;
+
+    // Each rule in the grammar.
+    repeated RuleData rules = 2;
+
+    // Whether the grammar is enabled.
+    bool enabled = 3;
+
+    // Whether the grammar is enabled and currently in-context.
+    bool active = 4;
+}
+
+// Message containing dragonfly rule data.
+message RuleData {
+    // Name of the rule.
+    string name = 1;
+
+    // A list of rule specifications
+    // This field will be different depending on the type of rule:
+    // - Base Rules (or direct subclasses) will have no spec strings.
+    // - CompoundRules will have one spec string.
+    // - MappingRules will have multiple spec strings.
+    repeated string specs = 2;
+
+    // Whether a rule is a top-level rule that can be spoken by the user.
+    bool exported = 3;
+
+    // Whether the rule is active.
+    bool active = 4;
+
+    // The type of the rule.
+    string type = 5;
+}
+
