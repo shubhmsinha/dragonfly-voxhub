@@ -4,7 +4,6 @@ Dragonfly gRPC server implementation.
 
 from concurrent import futures
 
-import time
 import grpc
 
 from dragonfly_pb2 import GrammarData, RuleData
@@ -12,23 +11,33 @@ from dragonfly_pb2_grpc import EngineServicer, add_EngineServicer_to_server
 
 
 class Servicer(EngineServicer):
+    def __init__(self, engine):
+        self.engine = engine
 
     def ListGrammars(self, request, context):
-        # Send the grammars.
-        # TODO Send grammars from the engine.
-        # TODO Use 'yield' instead of building all GrammarData objects at once.
-        grammar_data = [
-            GrammarData(name="test1", rules=[
-                RuleData(name="mapping_rule1", specs=["test", "testing"],
-                         exported=True, active=True, type="MappingRule")
-            ]),
-            GrammarData(name="test2", rules=[
-                RuleData(name="compound_rule1", specs=["compound test"],
-                         exported=True, active=True, type="CompoundRule")
-            ])
-        ]
-        for data in grammar_data:
-            yield data
+        # Send rule and grammar data back to the client.
+        for grammar in self.engine.grammars:
+            rules = []
+            for rule in grammar.rules:
+                # Check rule type through available attributes instead of types to
+                # avoid cyclic import problems.
+                if hasattr(rule, "spec"):
+                    type_ = "CompoundRule"
+                    specs = [rule.spec]
+                elif hasattr(rule, "specs"):
+                    specs = rule.specs
+                    type_ = "MappingRule"
+                else:
+                    specs = []
+                    type_ = "Rule"
+                rules.append(RuleData(name=rule.name, specs=specs,
+                                      exported=rule.exported, active=rule.active,
+                                      type=type_))
+
+            # Yield each grammar to send them to the client as a stream.
+            is_active = any([r.active for r in rules])
+            yield GrammarData(name=grammar.name, rules=rules,
+                              enabled=grammar.enabled, active=is_active)
 
 
 class DragonflyRPCServer(object):
@@ -44,10 +53,10 @@ class DragonflyRPCServer(object):
 
     ssh -NTf -L 50051:localhost:50051 <system-with-rpc-server>
     """
-    def __init__(self, address="localhost", port=50051):
+    def __init__(self, engine, address="localhost", port=50051):
         # Set up a gRPC server with an instance of the Servicer class above.
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        add_EngineServicer_to_server(Servicer(), server)
+        add_EngineServicer_to_server(Servicer(engine), server)
         self._server = server
         self._add_port(address, port)
 
@@ -73,13 +82,3 @@ class DragonflyRPCServer(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop()
-
-
-if __name__ == '__main__':
-    # Run the server if this module is run as a script.
-    try:
-        with DragonflyRPCServer():
-            while True:
-                time.sleep(10000)  # don't need to wake up much
-    except KeyboardInterrupt:
-        exit(0)

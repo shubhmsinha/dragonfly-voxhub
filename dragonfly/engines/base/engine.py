@@ -71,6 +71,16 @@ class EngineBase(object):
         self._grammar_wrappers = {}
         self._recognition_observer_manager = None
 
+        # Initialise and start the gRPC server if possible.
+        try:
+            from ...rpc import DragonflyRPCServer
+            self.rpc_server = DragonflyRPCServer(self)
+            self.rpc_server.start()
+        except Exception as e:
+            self._log.exception("Initialising or starting the RPC server "
+                                "raised an exception: %s" % e)
+            self.rpc_server = None
+
 #    def __del__(self):
 #        try:
 #            try:
