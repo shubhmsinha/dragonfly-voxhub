@@ -23,6 +23,10 @@
 SR back-end package for CMU Pocket Sphinx
 ============================================================================
 
+The main interface to this engine is provided by methods and properties of
+the engine class. Please see the :ref:`CMU Pocket Sphinx engine page
+<RefSphinxEngine>` for more details.
+
 """
 
 import logging
@@ -46,6 +50,24 @@ def is_engine_available():
         return False
     except Exception as e:
         _log.info("Exception during import of sphinxwrapper package: %s" % (e,))
+        return False
+
+    try:
+        import jsgf
+    except ImportError as e:
+        _log.info("Failed to import jsgf package: %s. Is pyjsgf installed?" % (e,))
+        return False
+    except Exception as e:
+        _log.info("Exception during import of jsgf package: %s" % (e,))
+        return False
+
+    try:
+        import pyaudio
+    except ImportError as e:
+        _log.info("Failed to import pyaudio package: %s. Is it installed?" % (e,))
+        return False
+    except Exception as e:
+        _log.info("Exception during import of pyaudio package: %s" % (e,))
         return False
 
     return True
