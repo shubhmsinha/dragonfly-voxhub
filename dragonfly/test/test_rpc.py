@@ -68,15 +68,13 @@ class RPCMethodTests(unittest.TestCase):
             for grammar in response:
                 grammars.append(grammar)
 
-            # Note that the grammar nor its rules are active because process_begin
-            # hasn't been called yet.
             self.assertListEqual(grammars, [
-                GrammarData(name="test", enabled=True, active=False, rules=[
+                GrammarData(name="test", enabled=True, active=True, rules=[
                     RuleData(name="compound", specs=["testing"], exported=True,
-                             active=False, type="CompoundRule"),
+                             active=True, type="CompoundRule"),
                     RuleData(name="mapping", specs=["command b", "command a"],
-                             exported=True, active=False, type="MappingRule"),
-                    RuleData(name="base", specs=[], active=False, type="Rule")
+                             exported=True, active=True, type="MappingRule"),
+                    RuleData(name="base", specs=[], active=True, type="Rule")
                 ])
             ])
 
