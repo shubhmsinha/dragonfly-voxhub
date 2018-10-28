@@ -62,9 +62,9 @@ setup(
                         "setuptools >= 0.6c7",
                         "pywin32;platform_system=='Windows'",
                         "six",
-                        "pyperclip == 1.6.1",
+                        "pyperclip >= 1.7.0",
                         "grpcio",
-                        "grpcio-tools"
+                        "grpcio-tools",
                        ],
 
       extras_require={

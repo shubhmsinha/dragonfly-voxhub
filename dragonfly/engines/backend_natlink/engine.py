@@ -31,7 +31,7 @@ Detecting sleep mode
 from six import text_type
 
 from ..base        import EngineBase, EngineError, MimicFailure
-from ...grammar.grammar_base import GrammarError
+from ...error import GrammarError
 from .dictation    import NatlinkDictationContainer
 from .recobs       import NatlinkRecObsManager
 from .timer        import NatlinkTimerManager
@@ -211,6 +211,12 @@ class NatlinkEngine(EngineBase):
     def speak(self, text):
         """ Speak the given *text* using text-to-speech. """
         self.natlink.execScript('TTSPlayString "%s"' % text)
+
+        # Turn on the mic if necessary so the user can start speaking again.
+        # This is to make the expected behaviour consistent for each version
+        # of Dragon.
+        if self.natlink.getMicState() != "on":
+            self.natlink.setMicState("on")
 
     def _get_language(self):
         import win32com.client

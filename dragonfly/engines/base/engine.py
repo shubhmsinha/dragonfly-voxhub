@@ -1,4 +1,4 @@
-﻿#
+#
 # This file is part of Dragonfly.
 # (c) Copyright 2007, 2008 by Christo Butcher
 # Licensed under the LGPL.
@@ -204,7 +204,14 @@ class EngineBase(object):
         """ Speak the given *text* using text-to-speech. """
         raise NotImplementedError("Engine %s not implemented." % self)
 
+    @property
+    def language(self):
+        """
+        Current user language of the SR engine. (Read-only)
+
+        :rtype: str
+        """
+        return self._get_language()
+
     def _get_language(self):
         raise NotImplementedError("Engine %s not implemented." % self)
-    language = property(fget=lambda self: self._get_language(),
-                        doc="Current user language of the SR engine.")
