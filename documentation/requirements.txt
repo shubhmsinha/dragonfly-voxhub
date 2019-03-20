@@ -1,3 +1,5 @@
 mock
 pyperclip>=1.7.0
 six
+ws4py
+pyaudio
